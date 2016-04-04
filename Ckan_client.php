@@ -138,10 +138,10 @@ class Ckan_client
 		curl_setopt($this->ch, CURLOPT_FOLLOWLOCATION, TRUE);
 		// However, don't follow more than five Location: headers.
 		curl_setopt($this->ch, CURLOPT_MAXREDIRS, 5);
-		// Automatically set the Referer: field in requests 
+		// Automatically set the Referer: field in requests
 		// following a Location: redirect.
 		curl_setopt($this->ch, CURLOPT_AUTOREFERER, TRUE);
-		// Return the transfer as a string instead of dumping to screen. 
+		// Return the transfer as a string instead of dumping to screen.
 		curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, TRUE);
 		// If it takes more than 45 seconds, fail
 		curl_setopt($this->ch, CURLOPT_TIMEOUT, 45);
@@ -197,10 +197,17 @@ class Ckan_client
 	 * @return	void
 	 * @since	Version 0.1.0
 	 */
-	private function set_base_url()
+	private function set_base_url($url=0)
 	{
 		// Append the CKAN API version to the base URI.
-		$this->base_url = sprintf($this->base_url, $this->api_version);
+		if ($url==0){
+			$url=$this->base_url
+		} else {
+			$url = implode('/',array_filter(explode('/', $url . "/%d")))."/";
+		}
+
+
+		$this->base_url = sprintf($url, $this->api_version);
 	}
 
 	/**
@@ -238,7 +245,7 @@ class Ckan_client
 		{
 			$server_name = '';
 		}
-		$this->user_agent = sprintf($this->user_agent, $this->version) . 
+		$this->user_agent = sprintf($this->user_agent, $this->version) .
 			' (' . $server_name . $_SERVER['PHP_SELF'] . ')';
 	}
 
@@ -265,8 +272,8 @@ class Ckan_client
 	 */
 	public function post_package_register($data)
 	{
-		return $this->make_request('POST', 
-			$this->resources['package_register'], 
+		return $this->make_request('POST',
+			$this->resources['package_register'],
 			$data);
 	}
 
@@ -281,7 +288,7 @@ class Ckan_client
 	 */
 	public function get_package_entity($package)
 	{
-		return $this->make_request('GET', 
+		return $this->make_request('GET',
 			$this->resources['package_entity'] . '/' . urlencode($package));
 	}
 
@@ -295,8 +302,8 @@ class Ckan_client
 	 */
 	public function put_package_entity($package, $data)
 	{
-		return $this->make_request('PUT', 
-			$this->resources['package_entity'] . '/' . urlencode($package), 
+		return $this->make_request('PUT',
+			$this->resources['package_entity'] . '/' . urlencode($package),
 			$data);
 	}
 
@@ -344,7 +351,7 @@ class Ckan_client
 	 */
 	public function get_group_entity($group)
 	{
-		return $this->make_request('GET', 
+		return $this->make_request('GET',
 			$this->resources['group_entity'] . '/' . urlencode($group));
 	}
 
@@ -388,7 +395,7 @@ class Ckan_client
 	 */
 	public function get_tag_entity($tag)
 	{
-		return $this->make_request('GET', $this->resources['tag_entity'] . 
+		return $this->make_request('GET', $this->resources['tag_entity'] .
 			'/' . urlencode($tag));
 	}
 
@@ -418,7 +425,7 @@ class Ckan_client
 	 */
 	public function get_revision_register()
 	{
-		return $this->make_request('GET', 
+		return $this->make_request('GET',
 			$this->resources['revision_register']);
 	}
 
@@ -430,7 +437,7 @@ class Ckan_client
 	 */
 	public function get_revision_entity($revision)
 	{
-		return $this->make_request('GET', 
+		return $this->make_request('GET',
 			$this->resources['revision_entity'] . '/' . urlencode($revision));
 	}
 
@@ -491,18 +498,18 @@ class Ckan_client
 		}
 		$q = '';
 		// Set querystring based on $opts param.
-		$q .= '&order_by=' . ((isset($opts['order_by'])) 
+		$q .= '&order_by=' . ((isset($opts['order_by']))
 			? urlencode($opts['order_by']) : 'rank');
-		$q .= '&offset=' . ((isset($opts['offset'])) 
+		$q .= '&offset=' . ((isset($opts['offset']))
 			? urlencode($opts['offset']) : '0');
-		$q .= '&limit=' . ((isset($opts['limit'])) 
+		$q .= '&limit=' . ((isset($opts['limit']))
 			? urlencode($opts['limit']) : '20');
-		$q .= '&filter_by_openness=' . ((isset($opts['openness'])) 
+		$q .= '&filter_by_openness=' . ((isset($opts['openness']))
 			? urlencode($opts['openness']) : '0');
-		$q .= '&filter_by_downloadable=' . ((isset($opts['downloadable'])) 
+		$q .= '&filter_by_downloadable=' . ((isset($opts['downloadable']))
 			? urlencode($opts['downloadable']) : '0');
-		return $data = $this->make_request('GET', 
-			$this->resources['package_search'] . '?q=' . 
+		return $data = $this->make_request('GET',
+			$this->resources['package_search'] . '?q=' .
 			urlencode($keywords) . $q);
 	}
 
@@ -536,12 +543,12 @@ class Ckan_client
 		if ($data)
 		{
 			// Set vars based on $opts param.
-			$search_term = (isset($opts['search_term'])) ? 
+			$search_term = (isset($opts['search_term'])) ?
 				$opts['search_term'] : '';
-			$title_tag = '<' . 
+			$title_tag = '<' .
 				((isset($opts['title_tag'])) ? $opts['title_tag'] : 'h2') . '>';
 			$title_close_tag = str_replace('<', '</', $title_tag);
-			$result_list_tag = (isset($opts['result_list_tag'])) 
+			$result_list_tag = (isset($opts['result_list_tag']))
 				? $opts['result_list_tag'] : 'ul';
 			if (strlen(trim($result_list_tag)))
 			{
@@ -552,17 +559,17 @@ class Ckan_client
 			{
 				$result_list_close_tag = '';
 			}
-			$show_notes = (isset($opts['show_notes'])) 
+			$show_notes = (isset($opts['show_notes']))
 				? $opts['show_notes'] : FALSE;
-			$format_notes = (isset($opts['format_notes'])) 
+			$format_notes = (isset($opts['format_notes']))
 				? $opts['format_notes'] : FALSE;
 			// Set search title string
 			// is|are, count, ''|s, ''|search_term, .|:
-			printf($title_tag . 'There %s %d result%s%s%s' . $title_close_tag, 
-				(($data->count === 1) ? 'is' : 'are'), 
-				$data->count, 
+			printf($title_tag . 'There %s %d result%s%s%s' . $title_close_tag,
+				(($data->count === 1) ? 'is' : 'are'),
+				$data->count,
 				(($data->count === 1) ? '' : 's'),
-				(strlen(trim($search_term)) 
+				(strlen(trim($search_term))
 					? ' for &#8220;' . $search_term . '&#8221;' : ''),
 				(($data->count === 0) ? '.' : ':'));
 			if ($data->count > 0)
@@ -574,7 +581,7 @@ class Ckan_client
 					printf('<li><a href="%s">%s</a>',
 						$package->ckan_url,
 						$package->title);
-					if (isset($package->notes) && $package->notes && 
+					if (isset($package->notes) && $package->notes &&
 						$show_notes)
 					{
 						print ': ';
@@ -588,7 +595,7 @@ class Ckan_client
 						}
 						else
 						{
-							print strip_tags(Markdown($package->notes), 
+							print strip_tags(Markdown($package->notes),
 								$format_notes);
 						}
 					}
@@ -638,7 +645,7 @@ class Ckan_client
 		{
 			// Since we can't use HTTPS,
 			 // if it's in there, remove Authorization: header
-			$key = array_search('Authorization: ' . $this->api_key, 
+			$key = array_search('Authorization: ' . $this->api_key,
 				$this->ch_headers);
 			if ($key !== FALSE)
 			{
@@ -654,14 +661,14 @@ class Ckan_client
 		// Check HTTP response code
 		if ($info['http_code'] !== 200)
 		{
-			throw new Exception($info['http_code'] . ': ' . 
+			throw new Exception($info['http_code'] . ': ' .
 				$this->http_status_codes[$info['http_code']]);
 		}
 		// Determine how to parse
 		if (isset($info['content_type']) && $info['content_type'])
 		{
-			$content_type = str_replace('application/', '', 
-				substr($info['content_type'], 0, 
+			$content_type = str_replace('application/', '',
+				substr($info['content_type'], 0,
 				strpos($info['content_type'], ';')));
 			return $this->parse_response($response, $content_type);
 		}
